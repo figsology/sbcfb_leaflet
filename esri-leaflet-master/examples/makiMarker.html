@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Esri Leaflet Demo</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="/the/path/to/leaflet.ie.css"><![endif]-->
+    <link rel="stylesheet" href="css/leaflet.awesome-markers.css">
+
+    <style>
+        html, body,  #map {
+            height: 100%;
+            width: 100%;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .legend {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+    </style>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+    <script src="lib/esri-leaflet/esri-leaflet.js"></script>
+    <script src="js/Leaflet.MakiMarkers.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var marker = L.icon({
+        iconUrl: '',
+        iconSize: [48, 48],
+        iconAnchor: [13.5, 13.5],
+        popupAnchor: [0, -11]
+    });
+
+    // Test for Maki Markers
+
+    var rocketIcon = L.MakiMarkers.icon({
+        icon: "rocket",
+        color: "#b0b",
+        size: "m"
+    });
+
+    var template = "<h3>{NAMELSAD}</h3> Population in Poverty: {TotalPov}<br> Children in Poverty: {Children}"
+
+    var m_template = "<h3>{School_Name}</h3> District: {School_District}<br> Percent_FR_Lunch: {Oct12EliPercFRPM}"
+    
+    var tracts = 'http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/SBTracts/FeatureServer/0';
+
+    var children_tracts = 'http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/SBTractsChildren.shp/FeatureServer/0';
+    
+    var schools = 'http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/schools/FeatureServer/0';
+    
+    function getTractColor(d) {
+        return d > 4485 ? '#800026' :
+               d > 2347 ? '#FC4E2A' :
+               d > 1024 ? '#FEB24C' :
+                          '#FFEDA0';
+    }
+
+    var map = L.map('map').setView([34.649, -120.051], 10);
+
+    L.esri.basemapLayer("Topographic").addTo(map);
+
+    L.esri.featureLayer(tracts, {
+        style: function (feature) {
+            return {
+                fillColor: getTractColor(feature.properties.TotalPov),
+                weight: 2,
+                opacity: 1,
+                color: '#666',
+                dashArray: '3',
+                fillOpacity: 0.7
+            };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(L.Util.template(template, feature.properties));
+        }
+    }).addTo(map);
+
+    new L.esri.featureLayer(schools, {
+        pointToLayer: function (geojson, latlng) {
+            return L.marker(latlng, {
+                icon: rocketIcon
+            });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(L.Util.template(m_template, feature.properties));
+        }
+    }).addTo(map);
+
+    var legend = L.control({position: 'bottomleft'});
+
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0, 1024, 2347, 4485],
+                labels = [],
+                from, to;
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            from = grades[i];
+            to = grades[i + 1];
+
+            labels.push(
+                    '<i style="background:' + getTractColor(from + 1) + '"></i> ' +
+                            from + (to ? '&ndash;' + to : '+'));
+        }
+
+        div.innerHTML = labels.join('<br>');
+        return div;
+    };
+
+    legend.addTo(map);
+
+    // var polygonLayers = {
+    //     "Total": tracts,
+    //     "Children": children_tracts
+    // };
+
+    // L.control.layers(polygonLayers).addTo(map);
+</script>
+</body>
+</html>
