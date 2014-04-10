@@ -70,13 +70,19 @@
     
     var schools = 'http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/schools/FeatureServer/0';
     
-    function getTractColor(d) {
+    function getTotalTractColor(d) {
         return d > 4485 ? '#800026' :
                d > 2347 ? '#FC4E2A' :
                d > 1024 ? '#FEB24C' :
                           '#FFEDA0';
     }
 
+    function getChildrenTractColor(d) {
+        return d > 1628 ? '#800026' :
+               d > 679  ? '#FC4E2A' :
+               d > 238  ? '#FEB24C' :
+                          '#FFEDA0'; 
+    }
     var map = L.map('map', {
         center: [34.649, -120.051],
         zoom: 10,
@@ -88,7 +94,7 @@
     var total_tracts = L.esri.featureLayer(tracts, {
         style: function (feature) {
             return {
-                fillColor: getTractColor(feature.properties.TotalPov),
+                fillColor: getTotalTractColor(feature.properties.TotalPov),
                 weight: 2,
                 opacity: 1,
                 color: '#666',
@@ -104,7 +110,7 @@
     children_tracts = L.esri.featureLayer(children_tracts, {
         style: function (feature) {
             return {
-                //fillColor: getTractColor(feature.properties.TotalPov),
+                fillColor: getChildrenTractColor(feature.properties.Children),
                 weight: 2,
                 opacity: 1,
                 color: '#666',
@@ -141,7 +147,7 @@
             to = grades[i + 1];
 
             labels.push(
-                    '<i style="background:' + getTractColor(from + 1) + '"></i> ' +
+                    '<i style="background:' + getTotalTractColor(from + 1) + '"></i> ' +
                             from + (to ? '&ndash;' + to : '+'));
         }
 
