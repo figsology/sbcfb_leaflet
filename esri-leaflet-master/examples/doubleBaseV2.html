@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DoubleBaseLayer</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="/the/path/to/leaflet.ie.css"><![endif]-->
+    <link rel="stylesheet" href="css/leaflet.awesome-markers.css">
+
+    <style>
+    html, body, #map {
+        height: 100%;
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+    }
+    .legend {
+        padding: 6px 8px;
+        font: 14px/16px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        text-align: left;
+        line-height: 18px;
+        color: #555;
+    }
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+    </style>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+    <script src="lib/esri-leaflet/esri-leaflet.js"></script>
+    <script src="js/Leaflet.MakiMarkers.js"></script>
+    <script src="js/ActiveLayers.js"></script>
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+    topographic = L.esri.basemapLayer("Topographic")
+
+    var gray = L.esri.basemapLayer("GrayLabels")
+
+    var tracts = L.esri.featureLayer('http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/SBTracts/FeatureServer/0')
+
+    var schools = L.esri.featureLayer('http://services3.arcgis.com/FnonYdWS8ZZjd8sl/arcgis/rest/services/schools/FeatureServer/0')
+
+    var map = L.map('map', {
+        center: [34.649, -120.051],
+        zoom: 10,
+        layers: [topographic]
+    })
+
+    var baseMapLayers = {
+        'Topograhic': topographic,
+        'tracts': tracts
+    }
+    var overlayLayers = {
+        //'CS': tracts,
+        'gray': gray,
+        'Schools': schools
+    }
+
+    var control = L.control.activeLayers(baseMapLayers, overlayLayers)
+    control.addTo(map)
+
+    // 'Mapnik'
+    console.log("First Log: " + control.getActiveBaseLayer().name)
+
+    //Clouds
+    var over = control.getActiveOverlayLayers()
+    for (var overlayId in over) {
+        console.log("Secong Log: " + over[overlayId].name)
+    }
+    </script>
+</body>
+
+</html>
